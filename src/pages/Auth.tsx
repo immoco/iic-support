@@ -12,11 +12,12 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Only redirect once we have both user and role resolved
     if (user && role) {
       if (role === 'admin') {
-        navigate('/admin');
+        navigate('/admin', { replace: true });
       } else {
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [user, role, navigate]);
@@ -28,10 +29,13 @@ export default function Auth() {
     }
   };
 
-  if (isLoading) {
+  // Show loading while auth is being determined OR while user exists but role is still being fetched
+  if (isLoading || (user && !role)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">
+          {user ? 'Loading your dashboard...' : 'Loading...'}
+        </div>
       </div>
     );
   }
