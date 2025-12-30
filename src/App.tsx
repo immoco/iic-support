@@ -13,6 +13,7 @@ import ResolvedLibrary from "./pages/ResolvedLibrary";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AdminFAQs from "./pages/admin/AdminFAQs";
+import AdminUsers from "./pages/admin/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="admin">
                   <AdminFAQs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminUsers />
                 </ProtectedRoute>
               }
             />
