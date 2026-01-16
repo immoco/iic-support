@@ -85,3 +85,27 @@ export interface Announcement {
   created_at: string;
   updated_at: string;
 }
+
+export type ActivityAction = 
+  | 'STATUS_UPDATED'
+  | 'ROLE_CHANGED'
+  | 'ANNOUNCEMENT_CREATED'
+  | 'ANNOUNCEMENT_UPDATED'
+  | 'ANNOUNCEMENT_DELETED'
+  | 'FAQ_CREATED'
+  | 'FAQ_EDITED'
+  | 'FAQ_DELETED'
+  | 'REQUEST_ASSIGNED'
+  | 'NOTE_ADDED';
+
+export type ActivityTargetType = 'request' | 'user' | 'announcement' | 'faq';
+
+export interface ActivityLog {
+  id: string;
+  actor_email: string;
+  action_type: ActivityAction;
+  target_id: string;
+  target_type: ActivityTargetType;
+  metadata: Record<string, any>;
+  created_at: string;
+}

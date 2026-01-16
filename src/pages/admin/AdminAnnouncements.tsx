@@ -44,9 +44,9 @@ export default function AdminAnnouncements() {
     setFormData({ title: '', body: '', display_order: 0 });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (confirm('Are you sure you want to delete this announcement?')) {
-      await deleteAnnouncement.mutateAsync(id);
+      await deleteAnnouncement.mutateAsync({ id, title });
     }
   };
 
@@ -194,7 +194,7 @@ export default function AdminAnnouncements() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(announcement.id)}
+                        onClick={() => handleDelete(announcement.id, announcement.title)}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />

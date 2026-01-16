@@ -65,9 +65,9 @@ export default function AdminFAQs() {
     setFormData({ category: '', question: '', answer: '', keywords: '' });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, question: string) => {
     if (confirm('Are you sure you want to delete this FAQ?')) {
-      await deleteFAQ.mutateAsync(id);
+      await deleteFAQ.mutateAsync({ id, question });
     }
   };
 
@@ -256,7 +256,7 @@ export default function AdminFAQs() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(faq.id)}
+                            onClick={() => handleDelete(faq.id, faq.question)}
                             className="h-8 w-8 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="w-4 h-4" />

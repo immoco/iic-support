@@ -24,6 +24,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Users, Shield, UserCog } from 'lucide-react';
 import { AppRole } from '@/types/database';
+import { activityLogger } from '@/lib/activityLogger';
 
 interface UserWithRole {
   id: string;
@@ -72,16 +73,20 @@ export default function AdminUsers() {
   });
 
   const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: AppRole }) => {
+    mutationFn: async ({ userId, newRole, oldRole, userEmail }: { userId: string; newRole: AppRole; oldRole: AppRole; userEmail: string }) => {
       const { error } = await supabase
         .from('user_roles')
         .update({ role: newRole })
         .eq('user_id', userId);
 
       if (error) throw error;
+      
+      // Log the role change
+      await activityLogger.roleChanged(userEmail, oldRole, newRole);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
       toast({
         title: 'Role updated',
         description: 'User role has been updated successfully.',
@@ -205,7 +210,12 @@ export default function AdminUsers() {
                         <Select
                           value={user.role}
                           onValueChange={(value: AppRole) =>
-                            updateRoleMutation.mutate({ userId: user.user_id, newRole: value })
+                            updateRoleMutation.mutate({ 
+                              userId: user.user_id, 
+                              newRole: value,
+                              oldRole: user.role,
+                              userEmail: user.email,
+                            })
                           }
                           disabled={updateRoleMutation.isPending}
                         >

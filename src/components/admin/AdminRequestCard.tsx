@@ -39,6 +39,7 @@ export function AdminRequestCard({ request }: AdminRequestCardProps) {
       requestId: request.id,
       status: newStatus,
       adminResponse: adminResponse || undefined,
+      oldStatus: request.status,
     });
   };
 

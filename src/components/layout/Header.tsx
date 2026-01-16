@@ -16,6 +16,7 @@ export function Header() {
         { href: '/admin/announcements', label: 'Announcements' },
         { href: '/admin/faqs', label: 'FAQs' },
         { href: '/admin/users', label: 'Users' },
+        { href: '/admin/activity-logs', label: 'Activity Logs' },
       ]
     : [
         { href: '/dashboard', label: 'My Requests' },

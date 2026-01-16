@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          id: string
+          actor_email: string
+          action_type: string
+          target_id: string
+          target_type: string
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_email: string
+          action_type: string
+          target_id: string
+          target_type: string
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          actor_email?: string
+          action_type?: string
+          target_id?: string
+          target_type?: string
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
       admin_notes: {
         Row: {
           admin_id: string

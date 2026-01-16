@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { FAQ, IssueCategory } from '@/types/database';
 import { toast } from 'sonner';
+import { activityLogger } from '@/lib/activityLogger';
 
 export function useFAQs() {
   return useQuery({
@@ -16,6 +17,9 @@ export function useFAQs() {
       if (error) throw error;
       return data as FAQ[];
     },
+    // Cache for 5 minutes to reduce DB hits
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -32,6 +36,9 @@ export function useActiveFAQs() {
       if (error) throw error;
       return data as FAQ[];
     },
+    // Cache for 5 minutes to reduce DB hits
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -73,11 +80,16 @@ export function useCreateFAQ() {
         .single();
       
       if (error) throw error;
+      
+      // Log FAQ creation
+      await activityLogger.faqCreated(data.id, data.question);
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faqs'] });
       queryClient.invalidateQueries({ queryKey: ['active-faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
       toast.success('FAQ created');
     },
     onError: (error) => {
@@ -99,11 +111,16 @@ export function useUpdateFAQ() {
         .single();
       
       if (error) throw error;
+      
+      // Log FAQ update
+      await activityLogger.faqEdited(id, updates);
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faqs'] });
       queryClient.invalidateQueries({ queryKey: ['active-faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
       toast.success('FAQ updated');
     },
     onError: (error) => {
@@ -116,17 +133,21 @@ export function useDeleteFAQ() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async ({ id, question }: { id: string; question: string }) => {
       const { error } = await supabase
         .from('faqs')
         .delete()
         .eq('id', id);
       
       if (error) throw error;
+      
+      // Log FAQ deletion
+      await activityLogger.faqDeleted(id, question);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['faqs'] });
       queryClient.invalidateQueries({ queryKey: ['active-faqs'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
       toast.success('FAQ deleted');
     },
     onError: (error) => {

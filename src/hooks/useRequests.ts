@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Request, RequestType, IssueCategory, ExceptionType, TrainingLevel, RequestStatus } from '@/types/database';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { activityLogger } from '@/lib/activityLogger';
 
 export function useMyRequests() {
   const { user } = useAuth();
@@ -104,11 +105,13 @@ export function useUpdateRequestStatus() {
     mutationFn: async ({ 
       requestId, 
       status, 
-      adminResponse 
+      adminResponse,
+      oldStatus,
     }: { 
       requestId: string; 
       status: RequestStatus; 
       adminResponse?: string;
+      oldStatus?: RequestStatus;
     }) => {
       const updateData: Partial<Request> = { status };
       if (adminResponse !== undefined) {
@@ -123,11 +126,18 @@ export function useUpdateRequestStatus() {
         .single();
       
       if (error) throw error;
+      
+      // Log status update if status changed
+      if (oldStatus && oldStatus !== status) {
+        await activityLogger.statusUpdated(requestId, oldStatus, status);
+      }
+      
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-requests'] });
       queryClient.invalidateQueries({ queryKey: ['my-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['activityLogs'] });
       toast.success('Request updated');
     },
     onError: (error) => {
